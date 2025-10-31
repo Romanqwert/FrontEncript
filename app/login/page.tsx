@@ -76,7 +76,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="Ingrese su usuario"
+                placeholder="Ingrese su correo"
                 value={formData.correoElectronico}
                 onChange={(e) => setFormData({ ...formData, correoElectronico: e.target.value })}
                 required
