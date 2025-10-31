@@ -71,7 +71,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email" className="font-medium" style={{ color: "var(--label-on-light)" }}>
-                Usuario o correo
+                Correo
               </Label>
               <Input
                 id="email"
