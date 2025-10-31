@@ -108,6 +108,18 @@ class ApiClient {
     return response.json()
   }
 
+  async listFilesForDownload(): Promise<ArchivoInfo[]> {
+    const response = await fetch(`${API_BASE_URL}/api/Archivos/list/download`, {
+      headers: this.getAuthHeader(),
+    })
+
+    if (!response.ok) {
+      throw new Error("Error al listar archivos para descargar")
+    }
+
+    return response.json()
+  }
+
   async downloadFile(id: number, fileName: string) {
     const response = await fetch(`${API_BASE_URL}/api/Archivos/download/${id}`, {
       headers: this.getAuthHeader(),

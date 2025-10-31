@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Menu, Lock, Unlock, History, Upload, Download, FileText, Plus, User } from "lucide-react"
+import { Menu, Lock, Unlock, History, Upload, FileText, Plus, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { api, type ArchivoInfo, type UserProfile } from "@/lib/api"
 import { BanreservasLogo } from "@/components/banreservas-logo"
@@ -14,11 +14,13 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
+import { FilesDataTable } from "@/components/files-data-table"
 
 export default function DashboardPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<"encrypt" | "decrypt" | "history" | "profile">("encrypt")
   const [files, setFiles] = useState<ArchivoInfo[]>([])
+  const [downloadableFiles, setDownloadableFiles] = useState<ArchivoInfo[]>([])
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -37,6 +39,8 @@ export default function DashboardPage() {
     loadUserProfile()
     if (activeTab === "history") {
       loadFiles()
+    } else if (activeTab === "decrypt") {
+      loadDownloadableFiles()
     }
   }, [activeTab, router])
 
@@ -57,6 +61,20 @@ export default function DashboardPage() {
     } catch (error) {
       setModalType("error")
       setModalMessage("Error al cargar archivos")
+      setShowModal(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadDownloadableFiles = async () => {
+    try {
+      setLoading(true)
+      const fileList = await api.listFilesForDownload()
+      setDownloadableFiles(fileList)
+    } catch (error) {
+      setModalType("error")
+      setModalMessage("Error al cargar archivos para descargar")
       setShowModal(true)
     } finally {
       setLoading(false)
@@ -117,12 +135,6 @@ export default function DashboardPage() {
   const handleLogout = () => {
     api.logout()
     router.push("/login")
-  }
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + " B"
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB"
-    return (bytes / (1024 * 1024)).toFixed(2) + " MB"
   }
 
   const formatDate = (dateString: string) => {
@@ -283,67 +295,32 @@ export default function DashboardPage() {
           )}
 
           {activeTab === "decrypt" && (
-            <div className="max-w-2xl mx-auto">
-              <div className="bg-card rounded-lg border border-border p-12 text-center">
-                <div className="mb-6 inline-flex items-center justify-center w-24 h-24 rounded-full bg-muted">
-                  <FileText className="h-12 w-12 text-muted-foreground" />
-                  <Plus className="h-6 w-6 text-muted-foreground absolute translate-x-4 translate-y-4" />
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-2xl font-bold mb-6">Desencriptar Documentos</h2>
+              {loading ? (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">Cargando archivos...</p>
                 </div>
-                <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                  Haga clic en "Agregar" - Arrastre y suelte archivos y carpetas para desencriptar
-                </p>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Selecciona un archivo de tu historial para desencriptar y descargar
-                </p>
-                <Button onClick={() => setActiveTab("history")} variant="outline">
-                  <History className="mr-2 h-4 w-4" />
-                  Ver Historial
-                </Button>
-              </div>
+              ) : (
+                <FilesDataTable
+                  files={downloadableFiles}
+                  showDownloadButton={true}
+                  onDownload={handleFileDownload}
+                  itemsPerPage={10}
+                />
+              )}
             </div>
           )}
 
           {activeTab === "history" && (
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-6xl mx-auto">
               <h2 className="text-2xl font-bold mb-6">Historial de Archivos</h2>
               {loading ? (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">Cargando archivos...</p>
                 </div>
-              ) : files.length === 0 ? (
-                <div className="bg-card rounded-lg border border-border p-12 text-center">
-                  <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No hay archivos en tu historial</p>
-                </div>
               ) : (
-                <div className="space-y-3">
-                  {files.map((file) => (
-                    <div
-                      key={file.idArchivo}
-                      className="bg-card rounded-lg border border-border p-4 flex items-center justify-between hover:bg-accent/5 transition-colors"
-                    >
-                      <div className="flex items-center gap-4 flex-1 min-w-0">
-                        <div className="flex-shrink-0">
-                          <FileText className="h-8 w-8 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium truncate">{file.nombreArchivo}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {formatFileSize(file.tamanoBytes)} • {formatDate(file.fechaSubida)}
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        onClick={() => handleFileDownload(file)}
-                        size="sm"
-                        className="bg-primary text-primary-foreground hover:bg-primary/90 flex-shrink-0"
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Descargar
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+                <FilesDataTable files={files} showDownloadButton={false} itemsPerPage={10} />
               )}
             </div>
           )}
