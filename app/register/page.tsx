@@ -75,12 +75,12 @@ export default function RegisterPage() {
                 <p className="text-xs text-muted-foreground">El Banco de todos los dominicanos</p>
               </div>
             </div>
-            <h2 className="text-xl font-bold text-foreground">REGISTRO DE USUARIO</h2>
+            <h2 className="text-xl font-bold text-foreground" style={{ color: "var(--label-on-light)" }}>REGISTRO DE USUARIO</h2>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-foreground font-medium">
+              <Label htmlFor="username" className="font-medium" style={{ color: "var(--label-on-light)" }}>
                 Nombre completo
               </Label>
               <Input
@@ -94,7 +94,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground font-medium">
+              <Label htmlFor="email" className="font-medium" style={{ color: "var(--label-on-light)" }}>
                 E-mail
               </Label>
               <Input
@@ -108,7 +108,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground font-medium">
+              <Label htmlFor="password" className="font-medium" style={{ color: "var(--label-on-light)" }}>
                 Contraseña
               </Label>
               <Input
@@ -122,7 +122,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-foreground font-medium">
+              <Label htmlFor="confirmPassword" className="font-medium" style={{ color: "var(--label-on-light)" }}>
                 Confirmar contraseña
               </Label>
               <Input

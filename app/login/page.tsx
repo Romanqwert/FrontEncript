@@ -70,8 +70,8 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground font-medium">
-                Usuario
+              <Label htmlFor="email" className="font-medium" style={{ color: "var(--label-on-light)" }}>
+                Usuario o correo
               </Label>
               <Input
                 id="email"
@@ -85,7 +85,7 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground font-medium">
+              <Label htmlFor="password" className="font-medium" style={{ color: "var(--label-on-light)" }}>
                 Ingrese su contraseña
               </Label>
               <div className="relative">
