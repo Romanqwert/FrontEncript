@@ -214,7 +214,7 @@ export default function DashboardPage() {
           }`}
         >
           <Unlock className="h-5 w-5" />
-          <span className="font-medium">Desencriptar documento</span>
+          <span className="font-medium">Descargar documento</span>
         </button>
 
         <button
@@ -341,9 +341,7 @@ export default function DashboardPage() {
 
           {activeTab === "decrypt" && (
             <div className="max-w-6xl mx-auto">
-              <h2 className="text-2xl font-bold mb-6">
-                Desencriptar Documentos
-              </h2>
+              <h2 className="text-2xl font-bold mb-6">Descargar Documento</h2>
               {loading ? (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">Cargando archivos...</p>
