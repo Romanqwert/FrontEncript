@@ -121,9 +121,32 @@ class ApiClient {
     return response.json();
   }
 
-  async downloadFile(id: number, fileName: string) {
+  async downloadFileOriginal(id: number, fileName: string) {
     const response = await fetch(
       `${API_BASE_URL}/api/Archivos/download/${id}`,
+      {
+        headers: this.getAuthHeader(),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Error al descargar archivo");
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  }
+
+  async downloadFile(id: number, fileName: string) {
+    const response = await fetch(
+      `${API_BASE_URL}/api/Archivos/download/unencrypted/${id}`,
       {
         headers: this.getAuthHeader(),
       }

@@ -143,6 +143,19 @@ export default function DashboardPage() {
     }
   };
 
+  const handleFileDownloadOriginal = async (file: ArchivoInfo) => {
+    try {
+      await api.downloadFileOriginal(file.idArchivo, file.nombreArchivo);
+      setModalType("success");
+      setModalMessage("Archivo descargado y desencriptado correctamente");
+      setShowModal(true);
+    } catch (error) {
+      setModalType("error");
+      setModalMessage("Error al descargar archivo");
+      setShowModal(true);
+    }
+  };
+
   const handleLogout = () => {
     api.logout();
     router.push("/login");
@@ -340,6 +353,7 @@ export default function DashboardPage() {
                   files={downloadableFiles}
                   showDownloadButton={true}
                   onDownload={handleFileDownload}
+                  onDownloadOriginal={handleFileDownloadOriginal}
                   itemsPerPage={10}
                 />
               )}
