@@ -1,3 +1,5 @@
+import { HistorialInfo } from "@/components/history-data-table";
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
 
@@ -97,8 +99,8 @@ class ApiClient {
     return response.json();
   }
 
-  async listFiles(): Promise<ArchivoInfo[]> {
-    const response = await fetch(`${API_BASE_URL}/api/Archivos/list`, {
+  async listHistory(): Promise<HistorialInfo[]> {
+    const response = await fetch(`${API_BASE_URL}/api/Archivos/history`, {
       headers: this.getAuthHeader(),
     });
 

@@ -24,13 +24,17 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { FilesDataTable } from "@/components/files-data-table";
+import {
+  HistorialInfo,
+  HistoryDataTable,
+} from "@/components/history-data-table";
 
 export default function DashboardPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<
     "encrypt" | "decrypt" | "history" | "profile"
   >("encrypt");
-  const [files, setFiles] = useState<ArchivoInfo[]>([]);
+  const [history, setHistory] = useState<HistorialInfo[]>([]);
   const [downloadableFiles, setDownloadableFiles] = useState<ArchivoInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -49,7 +53,7 @@ export default function DashboardPage() {
 
     loadUserProfile();
     if (activeTab === "history") {
-      loadFiles();
+      loadHistory();
     } else if (activeTab === "decrypt") {
       loadDownloadableFiles();
     }
@@ -64,11 +68,11 @@ export default function DashboardPage() {
     }
   };
 
-  const loadFiles = async () => {
+  const loadHistory = async () => {
     try {
       setLoading(true);
-      const fileList = await api.listFiles();
-      setFiles(fileList);
+      const history = await api.listHistory();
+      setHistory(history);
     } catch (error) {
       setModalType("error");
       setModalMessage("Error al cargar archivos");
@@ -118,7 +122,7 @@ export default function DashboardPage() {
         setShowModal(true);
         setUploading(false);
         if (activeTab === "history") {
-          loadFiles();
+          loadHistory();
         }
       }, 500);
     } catch (error) {
@@ -366,11 +370,7 @@ export default function DashboardPage() {
                   <p className="text-muted-foreground">Cargando archivos...</p>
                 </div>
               ) : (
-                <FilesDataTable
-                  files={files}
-                  showDownloadButton={false}
-                  itemsPerPage={10}
-                />
+                <HistoryDataTable history={history} itemsPerPage={10} />
               )}
             </div>
           )}
