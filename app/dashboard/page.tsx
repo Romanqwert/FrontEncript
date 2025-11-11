@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Menu,
@@ -48,7 +48,8 @@ export default function DashboardPage() {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [fileInput, setFileInput] = useState<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  // const [fileInput, setFileInput] = useState<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!api.isAuthenticated()) {
@@ -139,8 +140,8 @@ export default function DashboardPage() {
           // loadFiles();
         }
         // Reset file input
-        if (fileInput) {
-          fileInput.value = "";
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
         }
       }, 500);
     } catch (error) {
@@ -281,8 +282,7 @@ export default function DashboardPage() {
           <Plus className="h-6 w-6 text-muted-foreground absolute translate-x-4 translate-y-4" />
         </div>
         <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-          Haga clic en "Agregar" - Arrastre y suelte archivos y carpetas para
-          encriptar
+          Haga clic en "Agregar" para encriptar
         </p>
         <label htmlFor="file-upload">
           <Button
@@ -300,7 +300,7 @@ export default function DashboardPage() {
           type="file"
           className="hidden"
           onChange={handleFileUpload}
-          ref={setFileInput}
+          ref={fileInputRef}
         />
       </div>
     </div>
