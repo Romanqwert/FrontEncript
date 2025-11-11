@@ -136,7 +136,7 @@ export default function DashboardPage() {
         setUploading(false);
         setSelectedFile(null);
         if (activeTab === "history") {
-          loadFiles();
+          // loadFiles();
         }
         // Reset file input
         if (fileInput) {
