@@ -149,44 +149,46 @@ export function FileUploadModal({
           <DialogTitle>Previsualizar y Configurar Encriptación</DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 overflow-hidden">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 overflow-hidden min-h-0">
           {/* File Preview */}
-          <div className="flex flex-col">
+          <div className="flex flex-col min-h-0">
             <Label className="mb-2 font-semibold">Contenido del archivo:</Label>
-            <ScrollArea className="flex-1 border border-border rounded-md bg-muted p-4">
-              <pre className="text-sm whitespace-pre-wrap break-words font-mono text-muted-foreground">
+            <ScrollArea className="h-[400px] border border-border rounded-md bg-muted">
+              <pre className="text-sm whitespace-pre-wrap break-words font-mono text-muted-foreground p-4">
                 {isLoadingContent ? "Cargando..." : fileContent}
               </pre>
             </ScrollArea>
           </div>
 
           {/* Key Selection */}
-          <div className="flex flex-col">
+          <div className="flex flex-col min-h-0">
             <Label className="mb-2 font-semibold">
               {hasKeys
                 ? `Seleccionar campos a encriptar (${selectedKeys.size}/${keys.length})`
                 : "Este archivo no tiene campos extractibles"}
             </Label>
             {hasKeys ? (
-              <ScrollArea className="flex-1 border border-border rounded-md p-4 space-y-3">
-                {keys.map((key) => (
-                  <div key={key} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={key}
-                      checked={selectedKeys.has(key)}
-                      onCheckedChange={() => toggleKey(key)}
-                    />
-                    <Label
-                      htmlFor={key}
-                      className="font-normal cursor-pointer truncate flex-1"
-                    >
-                      {key}
-                    </Label>
-                  </div>
-                ))}
+              <ScrollArea className="h-[400px] border border-border rounded-md">
+                <div className="p-4 space-y-3">
+                  {keys.map((key) => (
+                    <div key={key} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={key}
+                        checked={selectedKeys.has(key)}
+                        onCheckedChange={() => toggleKey(key)}
+                      />
+                      <Label
+                        htmlFor={key}
+                        className="font-normal cursor-pointer truncate flex-1"
+                      >
+                        {key}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
               </ScrollArea>
             ) : (
-              <div className="flex-1 border border-border rounded-md p-4 flex items-center justify-center text-muted-foreground text-sm">
+              <div className="h-[400px] border border-border rounded-md p-4 flex items-center justify-center text-muted-foreground text-sm">
                 Encriptará todo el archivo
               </div>
             )}
