@@ -67,11 +67,28 @@ export function FileUploadModal({
   const extractJsonKeys = (content: string) => {
     try {
       const json = JSON.parse(content);
-      const extractedKeys = Object.keys(json);
+      const extractedKeys = extractKeysFromObject(json);
       setKeys(extractedKeys);
     } catch {
       setKeys([]);
     }
+  };
+
+  const extractKeysFromObject = (obj: any, prefix = ""): string[] => {
+    const keys: string[] = [];
+
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const fullKey = prefix ? `${prefix}.${key}` : key;
+        keys.push(fullKey);
+
+        if (typeof obj[key] === "object" && obj[key] !== null) {
+          keys.push(...extractKeysFromObject(obj[key], fullKey));
+        }
+      }
+    }
+
+    return keys;
   };
 
   const extractXmlKeys = (content: string) => {

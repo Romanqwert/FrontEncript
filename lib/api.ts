@@ -1,4 +1,4 @@
-import { HistorialInfo } from "@/components/history-data-table";
+import type { HistorialInfo } from "@/components/history-data-table";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
@@ -85,11 +85,14 @@ class ApiClient {
     const formData = new FormData();
     formData.append("file", file);
 
-    // Add encryptTargets if provided
-    if (encryptTargets) {
-      formData.append("encryptionKey", ""); // Empty key or you can handle it differently
-      formData.append("encryptTargets", JSON.stringify(encryptTargets));
+    if (encryptTargets && encryptTargets.length > 0) {
+      // Send each encrypt target as a separate form data item
+      encryptTargets.forEach((target) => {
+        formData.append("EncryptTargets", target);
+      });
     }
+    // Always send EncryptionKey even if empty
+    formData.append("EncryptionKey", "");
 
     const response = await fetch(`${API_BASE_URL}/api/Archivos/upload`, {
       method: "POST",
