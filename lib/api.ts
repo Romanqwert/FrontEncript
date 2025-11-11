@@ -1,38 +1,37 @@
-import { HistorialInfo } from "@/components/history-data-table";
+import type { HistorialInfo } from "@/components/history-data-table"
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7297"
 
 export interface LoginCredentials {
-  correoElectronico: string;
-  passwordHash: string;
+  correoElectronico: string
+  passwordHash: string
 }
 
 export interface RegisterData {
-  nombreUsuario: string;
-  correoElectronico: string;
-  passwordHash: string;
+  nombreUsuario: string
+  correoElectronico: string
+  passwordHash: string
 }
 
 export interface UserProfile {
-  idUsuario: number;
-  nombreUsuario: string;
-  correoElectronico: string;
-  fechaRegistro: string;
+  idUsuario: number
+  nombreUsuario: string
+  correoElectronico: string
+  fechaRegistro: string
 }
 
 export interface ArchivoInfo {
-  idArchivo: number;
-  nombreArchivo: string;
-  tipoMime: string;
-  tamanoBytes: number;
-  fechaSubida: string;
+  idArchivo: number
+  nombreArchivo: string
+  tipoMime: string
+  tamanoBytes: number
+  fechaSubida: string
 }
 
 class ApiClient {
   private getAuthHeader(): HeadersInit {
-    const token = localStorage.getItem("token");
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    const token = localStorage.getItem("token")
+    return token ? { Authorization: `Bearer ${token}` } : {}
   }
 
   async register(data: RegisterData) {
@@ -40,14 +39,14 @@ class ApiClient {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
-    });
+    })
 
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(error || "Error al registrar usuario");
+      const error = await response.text()
+      throw new Error(error || "Error al registrar usuario")
     }
 
-    return response.json();
+    return response.json()
   }
 
   async login(credentials: LoginCredentials) {
@@ -55,133 +54,130 @@ class ApiClient {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(credentials),
-    });
+    })
 
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(error || "Credenciales inválidas");
+      const error = await response.text()
+      throw new Error(error || "Credenciales inválidas")
     }
 
-    const data = await response.json();
+    const data = await response.json()
     if (data.token) {
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("token", data.token)
     }
-    return data;
+    return data
   }
 
   async getProfile(): Promise<UserProfile> {
     const response = await fetch(`${API_BASE_URL}/perfil`, {
       headers: this.getAuthHeader(),
-    });
+    })
 
     if (!response.ok) {
-      throw new Error("Error al obtener perfil");
+      throw new Error("Error al obtener perfil")
     }
 
-    return response.json();
+    return response.json()
   }
 
   async uploadFile(file: File, encryptTargets: string[] | null = null) {
-    const formData = new FormData();
-    formData.append("file", file);
+    const formData = new FormData()
+    formData.append("file", file)
 
-    // Add encryptTargets if provided
-    if (encryptTargets) {
-      formData.append("encryptionKey", ""); // Empty key or you can handle it differently
-      formData.append("encryptTargets", JSON.stringify(encryptTargets));
+    if (encryptTargets && encryptTargets.length > 0) {
+      // Send each encrypt target as a separate form data item
+      encryptTargets.forEach((target) => {
+        formData.append("EncryptTargets", target)
+      })
     }
+    // Always send EncryptionKey even if empty
+    formData.append("EncryptionKey", "")
 
     const response = await fetch(`${API_BASE_URL}/api/Archivos/upload`, {
       method: "POST",
       headers: this.getAuthHeader(),
       body: formData,
-    });
+    })
 
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(error || "Error al subir archivo");
+      const error = await response.text()
+      throw new Error(error || "Error al subir archivo")
     }
 
-    return response.json();
+    return response.json()
   }
 
   async listHistory(): Promise<HistorialInfo[]> {
     const response = await fetch(`${API_BASE_URL}/api/Archivos/history`, {
       headers: this.getAuthHeader(),
-    });
+    })
 
     if (!response.ok) {
-      throw new Error("Error al listar archivos");
+      throw new Error("Error al listar archivos")
     }
 
-    return response.json();
+    return response.json()
   }
 
   async listFilesForDownload(): Promise<ArchivoInfo[]> {
     const response = await fetch(`${API_BASE_URL}/api/Archivos/list/download`, {
       headers: this.getAuthHeader(),
-    });
+    })
 
     if (!response.ok) {
-      throw new Error("Error al listar archivos para descargar");
+      throw new Error("Error al listar archivos para descargar")
     }
 
-    return response.json();
+    return response.json()
   }
 
   async downloadFileOriginal(id: number, fileName: string) {
-    const response = await fetch(
-      `${API_BASE_URL}/api/Archivos/download/${id}`,
-      {
-        headers: this.getAuthHeader(),
-      }
-    );
+    const response = await fetch(`${API_BASE_URL}/api/Archivos/download/${id}`, {
+      headers: this.getAuthHeader(),
+    })
 
     if (!response.ok) {
-      throw new Error("Error al descargar archivo");
+      throw new Error("Error al descargar archivo")
     }
 
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = fileName
+    document.body.appendChild(a)
+    a.click()
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(a)
   }
 
   async downloadFile(id: number, fileName: string) {
-    const response = await fetch(
-      `${API_BASE_URL}/api/Archivos/download/unencrypted/${id}`,
-      {
-        headers: this.getAuthHeader(),
-      }
-    );
+    const response = await fetch(`${API_BASE_URL}/api/Archivos/download/unencrypted/${id}`, {
+      headers: this.getAuthHeader(),
+    })
 
     if (!response.ok) {
-      throw new Error("Error al descargar archivo");
+      throw new Error("Error al descargar archivo")
     }
 
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = fileName
+    document.body.appendChild(a)
+    a.click()
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(a)
   }
 
   logout() {
-    localStorage.removeItem("token");
+    localStorage.removeItem("token")
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem("token");
+    return !!localStorage.getItem("token")
   }
 }
 
-export const api = new ApiClient();
+export const api = new ApiClient()
