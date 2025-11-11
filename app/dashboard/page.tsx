@@ -28,6 +28,7 @@ import {
   HistorialInfo,
   HistoryDataTable,
 } from "@/components/history-data-table";
+import { FileUploadModal } from "@/components/file-upload-modal";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -44,6 +45,10 @@ export default function DashboardPage() {
   const [modalMessage, setModalMessage] = useState("");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [fileInput, setFileInput] = useState<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!api.isAuthenticated()) {
@@ -100,6 +105,14 @@ export default function DashboardPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setSelectedFile(file);
+    setShowUploadModal(true);
+  };
+
+  const handleUploadConfirm = async (encryptTargets: string[] | null) => {
+    if (!selectedFile) return;
+
+    setShowUploadModal(false);
     setUploading(true);
     setUploadProgress(0);
 
@@ -114,15 +127,20 @@ export default function DashboardPage() {
     }, 200);
 
     try {
-      await api.uploadFile(file);
+      await api.uploadFile(selectedFile, encryptTargets);
       setUploadProgress(100);
       setTimeout(() => {
         setModalType("success");
         setModalMessage("Archivo encriptado y subido correctamente");
         setShowModal(true);
         setUploading(false);
+        setSelectedFile(null);
         if (activeTab === "history") {
-          loadHistory();
+          loadFiles();
+        }
+        // Reset file input
+        if (fileInput) {
+          fileInput.value = "";
         }
       }, 500);
     } catch (error) {
@@ -131,6 +149,7 @@ export default function DashboardPage() {
       setModalMessage("Error al subir archivo");
       setShowModal(true);
       setUploading(false);
+      setSelectedFile(null);
     }
   };
 
@@ -281,6 +300,7 @@ export default function DashboardPage() {
           type="file"
           className="hidden"
           onChange={handleFileUpload}
+          ref={setFileInput}
         />
       </div>
     </div>
@@ -457,6 +477,16 @@ export default function DashboardPage() {
           {activeTab === "profile" && <ProfilePage />}
         </main>
       </div>
+
+      <FileUploadModal
+        open={showUploadModal}
+        file={selectedFile}
+        onConfirm={handleUploadConfirm}
+        onCancel={() => {
+          setShowUploadModal(false);
+          setSelectedFile(null);
+        }}
+      />
 
       <StatusModal
         open={showModal}

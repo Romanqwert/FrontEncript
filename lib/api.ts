@@ -81,9 +81,15 @@ class ApiClient {
     return response.json();
   }
 
-  async uploadFile(file: File) {
+  async uploadFile(file: File, encryptTargets: string[] | null = null) {
     const formData = new FormData();
     formData.append("file", file);
+
+    // Add encryptTargets if provided
+    if (encryptTargets) {
+      formData.append("encryptionKey", ""); // Empty key or you can handle it differently
+      formData.append("encryptTargets", JSON.stringify(encryptTargets));
+    }
 
     const response = await fetch(`${API_BASE_URL}/api/Archivos/upload`, {
       method: "POST",
