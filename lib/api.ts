@@ -94,6 +94,18 @@ class ApiClient {
     // Always send EncryptionKey even if empty
     formData.append("EncryptionKey", "");
 
+    // Opción 3: Versión más legible para archivos
+    console.log("FormData contents:");
+    for (const [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        console.log(
+          `${key}: File(name: ${value.name}, size: ${value.size}, type: ${value.type})`
+        );
+      } else {
+        console.log(`${key}:`, value);
+      }
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/Archivos/upload`, {
       method: "POST",
       headers: this.getAuthHeader(),

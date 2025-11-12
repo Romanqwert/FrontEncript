@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "./ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "./ui/scroll-area";
+import { ChevronRight } from "lucide-react";
 
 interface FileUploadModalProps {
   open: boolean;
@@ -124,13 +125,37 @@ export function FileUploadModal({
     setKeys(Array.from(foundKeys));
   };
 
+  // Helper to get all children keys of a parent key
+  const getChildKeys = (parentKey: string): string[] => {
+    return keys.filter((k) => k.startsWith(parentKey + "."));
+  };
+
+  // Helper to check if a key is a parent (has children)
+  const isParentKey = (key: string): boolean => {
+    return keys.some((k) => k.startsWith(key + "."));
+  };
+
+  // Get the depth level of a key
+  const getKeyDepth = (key: string): number => {
+    return key.split(".").length - 1;
+  };
+
   const toggleKey = (key: string) => {
     const newSelected = new Set(selectedKeys);
-    if (newSelected.has(key)) {
+    const isCurrentlySelected = newSelected.has(key);
+
+    if (isCurrentlySelected) {
+      // Deselect this key and all its children
       newSelected.delete(key);
+      const children = getChildKeys(key);
+      children.forEach((child) => newSelected.delete(child));
     } else {
+      // Select this key and all its children
       newSelected.add(key);
+      const children = getChildKeys(key);
+      children.forEach((child) => newSelected.add(child));
     }
+
     setSelectedKeys(newSelected);
   };
 
@@ -169,22 +194,47 @@ export function FileUploadModal({
             </Label>
             {hasKeys ? (
               <ScrollArea className="h-[400px] border border-border rounded-md">
-                <div className="p-4 space-y-3">
-                  {keys.map((key) => (
-                    <div key={key} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={key}
-                        checked={selectedKeys.has(key)}
-                        onCheckedChange={() => toggleKey(key)}
-                      />
-                      <Label
-                        htmlFor={key}
-                        className="font-normal cursor-pointer truncate flex-1"
+                <div className="p-4 space-y-1">
+                  {keys.map((key) => {
+                    const depth = getKeyDepth(key);
+                    const isParent = isParentKey(key);
+                    const isSelected = selectedKeys.has(key);
+                    const keyName = key.split(".").pop() || key;
+
+                    return (
+                      <div
+                        key={key}
+                        className="flex items-center space-x-2 group hover:bg-accent/50 rounded-md py-1 px-2 transition-colors"
+                        style={{ paddingLeft: `${depth * 1.5 + 0.5}rem` }}
                       >
-                        {key}
-                      </Label>
-                    </div>
-                  ))}
+                        {isParent && (
+                          <ChevronRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                        )}
+                        {!isParent && <div className="w-3" />}
+                        <Checkbox
+                          id={key}
+                          checked={isSelected}
+                          onCheckedChange={() => toggleKey(key)}
+                          className="flex-shrink-0"
+                        />
+                        <Label
+                          htmlFor={key}
+                          className="font-normal cursor-pointer flex-1 text-sm"
+                          title={key}
+                        >
+                          <span className={isParent ? "font-medium" : ""}>
+                            {keyName}
+                          </span>
+                          {isSelected && isParent && (
+                            <span className="ml-2 text-xs text-muted-foreground italic">
+                              (incluye {getChildKeys(key).length} hijo
+                              {getChildKeys(key).length !== 1 ? "s" : ""})
+                            </span>
+                          )}
+                        </Label>
+                      </div>
+                    );
+                  })}
                 </div>
               </ScrollArea>
             ) : (
