@@ -1,204 +1,227 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useState, useRef } from "react"
-import { useRouter } from "next/navigation"
-import { Menu, Lock, Unlock, History, Upload, FileText, Plus, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { api, type ArchivoInfo, type UserProfile } from "@/lib/api"
-import BanreservasLogo from "@/components/banreservas-logo"
-import { StatusModal } from "@/components/status-modal"
-import { ProgressModal } from "@/components/progress-modal"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { FilesDataTable } from "@/components/files-data-table"
-import { type HistorialInfo, HistoryDataTable } from "@/components/history-data-table"
-import { FileUploadModal } from "@/components/file-upload-modal"
-import { PasswordModal } from "@/components/password-modal"
+import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Menu,
+  Lock,
+  Unlock,
+  History,
+  Upload,
+  FileText,
+  Plus,
+  User,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { api, type ArchivoInfo, type UserProfile } from "@/lib/api";
+import BanreservasLogo from "@/components/banreservas-logo";
+import { StatusModal } from "@/components/status-modal";
+import { ProgressModal } from "@/components/progress-modal";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { FilesDataTable } from "@/components/files-data-table";
+import {
+  type HistorialInfo,
+  HistoryDataTable,
+} from "@/components/history-data-table";
+import { FileUploadModal } from "@/components/file-upload-modal";
+import { PasswordModal } from "@/components/password-modal";
 
 export default function DashboardPage() {
-  const router = useRouter()
-  const [activeTab, setActiveTab] = useState<"encrypt" | "decrypt" | "history" | "profile">("encrypt")
-  const [history, setHistory] = useState<HistorialInfo[]>([])
-  const [downloadableFiles, setDownloadableFiles] = useState<ArchivoInfo[]>([])
-  const [loading, setLoading] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [showModal, setShowModal] = useState(false)
-  const [modalType, setModalType] = useState<"success" | "error">("success")
-  const [modalMessage, setModalMessage] = useState("")
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<
+    "encrypt" | "decrypt" | "history" | "profile"
+  >("encrypt");
+  const [history, setHistory] = useState<HistorialInfo[]>([]);
+  const [downloadableFiles, setDownloadableFiles] = useState<ArchivoInfo[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState<"success" | "error">("success");
+  const [modalMessage, setModalMessage] = useState("");
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [showUploadModal, setShowUploadModal] = useState(false)
-  const [showPasswordModal, setShowPasswordModal] = useState(false)
-  const [passwordModalType, setPasswordModalType] = useState<"upload" | "download">("upload")
-  const [pendingEncryptTargets, setPendingEncryptTargets] = useState<string[] | null>(null)
-  const [pendingDownloadFile, setPendingDownloadFile] = useState<ArchivoInfo | null>(null)
-  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordModalType, setPasswordModalType] = useState<
+    "upload" | "download"
+  >("upload");
+  const [pendingEncryptTargets, setPendingEncryptTargets] = useState<
+    string[] | null
+  >(null);
+  const [pendingDownloadFile, setPendingDownloadFile] =
+    useState<ArchivoInfo | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!api.isAuthenticated()) {
-      router.push("/login")
-      return
+      router.push("/login");
+      return;
     }
 
-    loadUserProfile()
+    loadUserProfile();
     if (activeTab === "history") {
-      loadHistory()
+      loadHistory();
     } else if (activeTab === "decrypt") {
-      loadDownloadableFiles()
+      loadDownloadableFiles();
     }
-  }, [activeTab, router])
+  }, [activeTab, router]);
 
   const loadUserProfile = async () => {
     try {
-      const profile = await api.getProfile()
-      setUserProfile(profile)
+      const profile = await api.getProfile();
+      setUserProfile(profile);
     } catch (error) {
-      console.error("Error loading profile:", error)
+      console.error("Error loading profile:", error);
     }
-  }
+  };
 
   const loadHistory = async () => {
     try {
-      setLoading(true)
-      const history = await api.listHistory()
-      setHistory(history)
+      setLoading(true);
+      const history = await api.listHistory();
+      setHistory(history);
     } catch (error) {
-      setModalType("error")
-      setModalMessage("Error al cargar archivos")
-      setShowModal(true)
+      setModalType("error");
+      setModalMessage("Error al cargar archivos");
+      setShowModal(true);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const loadDownloadableFiles = async () => {
     try {
-      setLoading(true)
-      const fileList = await api.listFilesForDownload()
-      setDownloadableFiles(fileList)
+      setLoading(true);
+      const fileList = await api.listFilesForDownload();
+      setDownloadableFiles(fileList);
     } catch (error) {
-      setModalType("error")
-      setModalMessage("Error al cargar archivos para descargar")
-      setShowModal(true)
+      setModalType("error");
+      setModalMessage("Error al cargar archivos para descargar");
+      setShowModal(true);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    setSelectedFile(file)
-    setShowUploadModal(true)
-  }
+    setSelectedFile(file);
+    setShowUploadModal(true);
+  };
 
   const handleUploadConfirm = async (encryptTargets: string[] | null) => {
-    if (!selectedFile) return
+    if (!selectedFile) return;
 
-    setPendingEncryptTargets(encryptTargets)
-    setPasswordModalType("upload")
-    setShowPasswordModal(true)
-    setShowUploadModal(false)
-  }
+    setPendingEncryptTargets(encryptTargets);
+    setPasswordModalType("upload");
+    setShowPasswordModal(true);
+    setShowUploadModal(false);
+  };
 
   const handlePasswordConfirmed = async (password: string) => {
     if (passwordModalType === "upload" && selectedFile) {
-      await performUpload(password)
+      await performUpload(password);
     } else if (passwordModalType === "download" && pendingDownloadFile) {
-      await performDownload(password)
+      await performDownload(password);
     }
-    setShowPasswordModal(false)
-  }
+    setShowPasswordModal(false);
+  };
 
   const performUpload = async (password: string) => {
-    if (!selectedFile) return
+    if (!selectedFile) return;
 
-    setUploading(true)
-    setUploadProgress(0)
+    setUploading(true);
+    setUploadProgress(0);
 
     const progressInterval = setInterval(() => {
       setUploadProgress((prev) => {
         if (prev >= 90) {
-          clearInterval(progressInterval)
-          return 90
+          clearInterval(progressInterval);
+          return 90;
         }
-        return prev + 10
-      })
-    }, 200)
+        return prev + 10;
+      });
+    }, 200);
 
     try {
-      await api.uploadFile(selectedFile, pendingEncryptTargets, password)
-      setUploadProgress(100)
+      await api.uploadFile(selectedFile, pendingEncryptTargets, password);
+      setUploadProgress(100);
       setTimeout(() => {
-        setModalType("success")
-        setModalMessage("Archivo encriptado y subido correctamente")
-        setShowModal(true)
-        setUploading(false)
-        setSelectedFile(null)
-        setPendingEncryptTargets(null)
+        setModalType("success");
+        setModalMessage("Archivo encriptado y subido correctamente");
+        setShowModal(true);
+        setUploading(false);
+        setSelectedFile(null);
+        setPendingEncryptTargets(null);
         if (fileInputRef.current) {
-          fileInputRef.current.value = ""
+          fileInputRef.current.value = "";
         }
-      }, 500)
+      }, 500);
     } catch (error) {
-      clearInterval(progressInterval)
-      setModalType("error")
-      setModalMessage("Error al subir archivo")
-      setShowModal(true)
-      setUploading(false)
-      setSelectedFile(null)
-      setPendingEncryptTargets(null)
+      clearInterval(progressInterval);
+      setModalType("error");
+      setModalMessage("Error al subir archivo");
+      setShowModal(true);
+      setUploading(false);
+      setSelectedFile(null);
+      setPendingEncryptTargets(null);
     }
-  }
+  };
 
   const performDownload = async (password: string) => {
-    if (!pendingDownloadFile) return
+    if (!pendingDownloadFile) return;
 
     try {
-      await api.downloadFileOriginal(pendingDownloadFile.idArchivo, pendingDownloadFile.nombreArchivo, password)
-      setModalType("success")
-      setModalMessage("Archivo descargado y desencriptado correctamente")
-      setShowModal(true)
-      setPendingDownloadFile(null)
+      await api.downloadFileOriginal(
+        pendingDownloadFile.idArchivo,
+        pendingDownloadFile.nombreArchivo,
+        password
+      );
+      setModalType("success");
+      setModalMessage("Archivo descargado y desencriptado correctamente");
+      setShowModal(true);
+      setPendingDownloadFile(null);
     } catch (error) {
-      setModalType("error")
-      setModalMessage("Error al descargar archivo")
-      setShowModal(true)
-      setPendingDownloadFile(null)
+      setModalType("error");
+      setModalMessage("Error al descargar archivo");
+      setShowModal(true);
+      setPendingDownloadFile(null);
     }
-  }
+  };
 
   const handleFileDownload = async (file: ArchivoInfo) => {
     try {
-      await api.downloadFile(file.idArchivo, file.nombreArchivo)
-      setModalType("success")
-      setModalMessage("Archivo descargado y desencriptado correctamente")
-      setShowModal(true)
+      await api.downloadFile(file.idArchivo, file.nombreArchivo);
+      setModalType("success");
+      setModalMessage("Archivo descargado y desencriptado correctamente");
+      setShowModal(true);
     } catch (error) {
-      setModalType("error")
-      setModalMessage("Error al descargar archivo")
-      setShowModal(true)
+      setModalType("error");
+      setModalMessage("Error al descargar archivo");
+      setShowModal(true);
     }
-  }
+  };
 
   const handleFileDownloadOriginal = async (file: ArchivoInfo) => {
-    setPendingDownloadFile(file)
-    setPasswordModalType("download")
-    setShowPasswordModal(true)
-  }
+    setPendingDownloadFile(file);
+    setPasswordModalType("download");
+    setShowPasswordModal(true);
+  };
 
   const handleLogout = () => {
-    api.logout()
-    router.push("/login")
-  }
+    api.logout();
+    router.push("/login");
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("es-ES", {
@@ -207,14 +230,17 @@ export default function DashboardPage() {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    })
-  }
+    });
+  };
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
       <div className="p-6 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <BanreservasLogo className="h-10 w-10 text-sidebar-foreground" imageSrc="/isotipo.svg" />
+          <BanreservasLogo
+            className="h-10 w-10 text-sidebar-foreground"
+            imageSrc="/isotipo.svg"
+          />
           <div>
             <h1 className="text-lg font-bold">BANRESERVAS</h1>
             <p className="text-xs opacity-80">Sistema de Archivos</p>
@@ -225,8 +251,8 @@ export default function DashboardPage() {
       <nav className="flex-1 p-4 space-y-2">
         <button
           onClick={() => {
-            setActiveTab("encrypt")
-            setSidebarOpen(false)
+            setActiveTab("encrypt");
+            setSidebarOpen(false);
           }}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
             activeTab === "encrypt"
@@ -240,8 +266,8 @@ export default function DashboardPage() {
 
         <button
           onClick={() => {
-            setActiveTab("decrypt")
-            setSidebarOpen(false)
+            setActiveTab("decrypt");
+            setSidebarOpen(false);
           }}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
             activeTab === "decrypt"
@@ -255,8 +281,8 @@ export default function DashboardPage() {
 
         <button
           onClick={() => {
-            setActiveTab("history")
-            setSidebarOpen(false)
+            setActiveTab("history");
+            setSidebarOpen(false);
           }}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
             activeTab === "history"
@@ -270,8 +296,8 @@ export default function DashboardPage() {
 
         <button
           onClick={() => {
-            setActiveTab("profile")
-            setSidebarOpen(false)
+            setActiveTab("profile");
+            setSidebarOpen(false);
           }}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
             activeTab === "profile"
@@ -284,7 +310,7 @@ export default function DashboardPage() {
         </button>
       </nav>
     </div>
-  )
+  );
 
   const EncryptPage = () => (
     <div className="max-w-2xl mx-auto">
@@ -293,19 +319,30 @@ export default function DashboardPage() {
           <FileText className="h-12 w-12 text-muted-foreground" />
           <Plus className="h-6 w-6 text-muted-foreground absolute translate-x-4 translate-y-4" />
         </div>
-        <p className="text-muted-foreground mb-8 max-w-md mx-auto">Haga clic en "Agregar" para encriptar</p>
+        <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+          Haga clic en "Agregar" para encriptar
+        </p>
         <label htmlFor="file-upload">
-          <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button
+            asChild
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
             <span className="cursor-pointer">
               <Upload className="mr-2 h-4 w-4" />
               Agregar Archivo
             </span>
           </Button>
         </label>
-        <input id="file-upload" type="file" className="hidden" onChange={handleFileUpload} ref={fileInputRef} />
+        <input
+          id="file-upload"
+          type="file"
+          className="hidden"
+          onChange={handleFileUpload}
+          ref={fileInputRef}
+        />
       </div>
     </div>
-  )
+  );
 
   const DecryptPage = () => (
     <div className="max-w-6xl mx-auto">
@@ -324,7 +361,7 @@ export default function DashboardPage() {
         />
       )}
     </div>
-  )
+  );
 
   const HistoryPage = () => (
     <div className="max-w-6xl mx-auto">
@@ -337,7 +374,7 @@ export default function DashboardPage() {
         <HistoryDataTable history={history} itemsPerPage={10} />
       )}
     </div>
-  )
+  );
 
   const ProfilePage = () =>
     userProfile && (
@@ -352,43 +389,65 @@ export default function DashboardPage() {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <CardTitle className="text-2xl">{userProfile.nombreUsuario}</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">Usuario de BANRESERVAS</p>
+                <CardTitle className="text-2xl">
+                  {userProfile.nombreUsuario}
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Usuario de BANRESERVAS
+                </p>
               </div>
             </div>
           </CardHeader>
           <CardContent className="pt-6 space-y-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground">ID de Usuario</Label>
+                <Label className="text-sm font-medium text-muted-foreground">
+                  ID de Usuario
+                </Label>
                 <p className="text-base font-medium">{userProfile.idUsuario}</p>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground">Nombre de Usuario</Label>
-                <p className="text-base font-medium">{userProfile.nombreUsuario}</p>
+                <Label className="text-sm font-medium text-muted-foreground">
+                  Nombre de Usuario
+                </Label>
+                <p className="text-base font-medium">
+                  {userProfile.nombreUsuario}
+                </p>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground">Correo Electrónico</Label>
-                <p className="text-base font-medium">{userProfile.correoElectronico}</p>
+                <Label className="text-sm font-medium text-muted-foreground">
+                  Correo Electrónico
+                </Label>
+                <p className="text-base font-medium">
+                  {userProfile.correoElectronico}
+                </p>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground">Fecha de Registro</Label>
-                <p className="text-base font-medium">{formatDate(userProfile.fechaRegistro)}</p>
+                <Label className="text-sm font-medium text-muted-foreground">
+                  Fecha de Registro
+                </Label>
+                <p className="text-base font-medium">
+                  {formatDate(userProfile.fechaRegistro)}
+                </p>
               </div>
             </div>
 
             <div className="pt-4 border-t border-border">
-              <Button onClick={handleLogout} variant="destructive" className="w-full">
+              <Button
+                onClick={handleLogout}
+                variant="destructive"
+                className="w-full"
+              >
                 Cerrar Sesión
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
-    )
+    );
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -408,14 +467,23 @@ export default function DashboardPage() {
             <div className="flex items-center gap-4">
               <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="lg:hidden text-primary-foreground hover:bg-primary/90">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="lg:hidden text-primary-foreground hover:bg-primary/90"
+                  >
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
               </Sheet>
               <div className="flex items-center gap-3">
-                <BanreservasLogo className="h-8 w-8 text-primary-foreground" imageSrc="/isotipo.svg" />
-                <h1 className="text-lg font-bold hidden sm:block">BANRESERVAS</h1>
+                <BanreservasLogo
+                  className="h-8 w-8 text-primary-foreground"
+                  imageSrc="/isotipo.svg"
+                />
+                <h1 className="text-lg font-bold hidden sm:block">
+                  BANRESERVAS
+                </h1>
               </div>
             </div>
 
@@ -453,14 +521,18 @@ export default function DashboardPage() {
         file={selectedFile}
         onConfirm={handleUploadConfirm}
         onCancel={() => {
-          setShowUploadModal(false)
-          setSelectedFile(null)
+          setShowUploadModal(false);
+          setSelectedFile(null);
         }}
       />
 
       <PasswordModal
         open={showPasswordModal}
-        title={passwordModalType === "upload" ? "Contraseña de Encriptación" : "Contraseña de Desencriptación"}
+        title={
+          passwordModalType === "upload"
+            ? "Contraseña de Encriptación"
+            : "Contraseña de Desencriptación"
+        }
         description={
           passwordModalType === "upload"
             ? "Ingrese una contraseña para encriptar el archivo"
@@ -468,16 +540,25 @@ export default function DashboardPage() {
         }
         onConfirm={handlePasswordConfirmed}
         onCancel={() => {
-          setShowPasswordModal(false)
-          setPendingEncryptTargets(null)
-          setPendingDownloadFile(null)
+          setShowPasswordModal(false);
+          setPendingEncryptTargets(null);
+          setPendingDownloadFile(null);
         }}
         isLoading={uploading}
       />
 
-      <StatusModal open={showModal} onOpenChange={setShowModal} type={modalType} message={modalMessage} />
+      <StatusModal
+        open={showModal}
+        onOpenChange={setShowModal}
+        type={modalType}
+        message={modalMessage}
+      />
 
-      <ProgressModal open={uploading} progress={uploadProgress} message="Cargando..." />
+      <ProgressModal
+        open={uploading}
+        progress={uploadProgress}
+        message="Cargando..."
+      />
     </div>
-  )
+  );
 }
