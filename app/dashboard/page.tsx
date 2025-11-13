@@ -4,16 +4,7 @@ import type React from "react";
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Menu,
-  Lock,
-  Unlock,
-  History,
-  Upload,
-  FileText,
-  Plus,
-  User,
-} from "lucide-react";
+import { Menu, Lock, Unlock, History, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api, type ArchivoInfo, type UserProfile } from "@/lib/api";
 import BanreservasLogo from "@/components/banreservas-logo";
@@ -21,13 +12,7 @@ import { StatusModal } from "@/components/status-modal";
 import { ProgressModal } from "@/components/progress-modal";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { FilesDataTable } from "@/components/files-data-table";
-import {
-  type HistorialInfo,
-  HistoryDataTable,
-} from "@/components/history-data-table";
+import { type HistorialInfo } from "@/components/history-data-table";
 import { FileUploadModal } from "@/components/file-upload-modal";
 import { PasswordModal } from "@/components/password-modal";
 import { EncryptPage } from "./encrypt/page";
@@ -35,18 +20,29 @@ import { DecryptPage } from "./download/page";
 import { HistoryPage } from "./history/page";
 import { ProfilePage } from "./profile/page";
 
+import {
+  TABS,
+  type TabType,
+  MODAL_MESSAGES,
+  MODAL_TYPES,
+  PASSWORD_MODAL_TYPES,
+  PASSWORD_MODAL_CONFIG,
+  UPLOAD_PROGRESS,
+  UI_TEXT,
+} from "@/constants/dashboard";
+
 export default function DashboardPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<
-    "encrypt" | "decrypt" | "history" | "profile"
-  >("encrypt");
+  const [activeTab, setActiveTab] = useState<TabType>(TABS.ENCRYPT);
   const [history, setHistory] = useState<HistorialInfo[]>([]);
   const [downloadableFiles, setDownloadableFiles] = useState<ArchivoInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<"success" | "error">("success");
+  const [modalType, setModalType] = useState<
+    (typeof MODAL_TYPES)[keyof typeof MODAL_TYPES]
+  >(MODAL_TYPES.SUCCESS);
   const [modalMessage, setModalMessage] = useState("");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -55,8 +51,8 @@ export default function DashboardPage() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordModalType, setPasswordModalType] = useState<
-    "upload" | "download"
-  >("upload");
+    (typeof PASSWORD_MODAL_TYPES)[keyof typeof PASSWORD_MODAL_TYPES]
+  >(PASSWORD_MODAL_TYPES.UPLOAD);
   const [pendingEncryptTargets, setPendingEncryptTargets] = useState<
     string[] | null
   >(null);
@@ -71,9 +67,9 @@ export default function DashboardPage() {
     }
 
     loadUserProfile();
-    if (activeTab === "history") {
+    if (activeTab === TABS.HISTORY) {
       loadHistory();
-    } else if (activeTab === "decrypt") {
+    } else if (activeTab === TABS.DECRYPT) {
       loadDownloadableFiles();
     }
   }, [activeTab, router]);
@@ -83,7 +79,7 @@ export default function DashboardPage() {
       const profile = await api.getProfile();
       setUserProfile(profile);
     } catch (error) {
-      console.error("Error loading profile:", error);
+      console.error(MODAL_MESSAGES.LOAD_PROFILE_ERROR, error);
     }
   };
 
@@ -93,8 +89,8 @@ export default function DashboardPage() {
       const history = await api.listHistory();
       setHistory(history);
     } catch (error) {
-      setModalType("error");
-      setModalMessage("Error al cargar archivos");
+      setModalType(MODAL_TYPES.ERROR);
+      setModalMessage(MODAL_MESSAGES.LOAD_HISTORY_ERROR);
       setShowModal(true);
     } finally {
       setLoading(false);
@@ -107,8 +103,8 @@ export default function DashboardPage() {
       const fileList = await api.listFilesForDownload();
       setDownloadableFiles(fileList);
     } catch (error) {
-      setModalType("error");
-      setModalMessage("Error al cargar archivos para descargar");
+      setModalType(MODAL_TYPES.ERROR);
+      setModalMessage(MODAL_MESSAGES.LOAD_FILES_ERROR);
       setShowModal(true);
     } finally {
       setLoading(false);
@@ -127,15 +123,18 @@ export default function DashboardPage() {
     if (!selectedFile) return;
 
     setPendingEncryptTargets(encryptTargets);
-    setPasswordModalType("upload");
+    setPasswordModalType(PASSWORD_MODAL_TYPES.UPLOAD);
     setShowPasswordModal(true);
     setShowUploadModal(false);
   };
 
   const handlePasswordConfirmed = async (password: string) => {
-    if (passwordModalType === "upload" && selectedFile) {
+    if (passwordModalType === PASSWORD_MODAL_TYPES.UPLOAD && selectedFile) {
       await performUpload(password);
-    } else if (passwordModalType === "download" && pendingDownloadFile) {
+    } else if (
+      passwordModalType === PASSWORD_MODAL_TYPES.DOWNLOAD &&
+      pendingDownloadFile
+    ) {
       await performDownload(password);
     }
     setShowPasswordModal(false);
@@ -149,20 +148,20 @@ export default function DashboardPage() {
 
     const progressInterval = setInterval(() => {
       setUploadProgress((prev) => {
-        if (prev >= 90) {
+        if (prev >= UPLOAD_PROGRESS.MAX_BEFORE_COMPLETE) {
           clearInterval(progressInterval);
-          return 90;
+          return UPLOAD_PROGRESS.MAX_BEFORE_COMPLETE;
         }
-        return prev + 10;
+        return prev + UPLOAD_PROGRESS.INCREMENT;
       });
-    }, 200);
+    }, UPLOAD_PROGRESS.INTERVAL_MS);
 
     try {
       await api.uploadFile(selectedFile, pendingEncryptTargets, password);
-      setUploadProgress(100);
+      setUploadProgress(UPLOAD_PROGRESS.COMPLETE);
       setTimeout(() => {
-        setModalType("success");
-        setModalMessage("Archivo encriptado y subido correctamente");
+        setModalType(MODAL_TYPES.SUCCESS);
+        setModalMessage(MODAL_MESSAGES.UPLOAD_SUCCESS);
         setShowModal(true);
         setUploading(false);
         setSelectedFile(null);
@@ -170,11 +169,11 @@ export default function DashboardPage() {
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
-      }, 500);
+      }, UPLOAD_PROGRESS.COMPLETE_DELAY_MS);
     } catch (error) {
       clearInterval(progressInterval);
-      setModalType("error");
-      setModalMessage("Error al subir archivo");
+      setModalType(MODAL_TYPES.ERROR);
+      setModalMessage(MODAL_MESSAGES.UPLOAD_ERROR);
       setShowModal(true);
       setUploading(false);
       setSelectedFile(null);
@@ -191,13 +190,13 @@ export default function DashboardPage() {
         pendingDownloadFile.nombreArchivo,
         password
       );
-      setModalType("success");
-      setModalMessage("Archivo descargado y desencriptado correctamente");
+      setModalType(MODAL_TYPES.SUCCESS);
+      setModalMessage(MODAL_MESSAGES.DOWNLOAD_SUCCESS);
       setShowModal(true);
       setPendingDownloadFile(null);
     } catch (error) {
-      setModalType("error");
-      setModalMessage("Error al descargar archivo");
+      setModalType(MODAL_TYPES.ERROR);
+      setModalMessage(MODAL_MESSAGES.DOWNLOAD_ERROR);
       setShowModal(true);
       setPendingDownloadFile(null);
     }
@@ -206,19 +205,19 @@ export default function DashboardPage() {
   const handleFileDownload = async (file: ArchivoInfo) => {
     try {
       await api.downloadFile(file.idArchivo, file.nombreArchivo);
-      setModalType("success");
-      setModalMessage("Archivo descargado y desencriptado correctamente");
+      setModalType(MODAL_TYPES.SUCCESS);
+      setModalMessage(MODAL_MESSAGES.DOWNLOAD_SUCCESS);
       setShowModal(true);
     } catch (error) {
-      setModalType("error");
-      setModalMessage("Error al descargar archivo");
+      setModalType(MODAL_TYPES.ERROR);
+      setModalMessage(MODAL_MESSAGES.DOWNLOAD_ERROR);
       setShowModal(true);
     }
   };
 
   const handleFileDownloadOriginal = async (file: ArchivoInfo) => {
     setPendingDownloadFile(file);
-    setPasswordModalType("download");
+    setPasswordModalType(PASSWORD_MODAL_TYPES.DOWNLOAD);
     setShowPasswordModal(true);
   };
 
@@ -236,8 +235,8 @@ export default function DashboardPage() {
             imageSrc="/isotipo.svg"
           />
           <div>
-            <h1 className="text-lg font-bold">BANRESERVAS</h1>
-            <p className="text-xs opacity-80">Sistema de Archivos</p>
+            <h1 className="text-lg font-bold">{UI_TEXT.APP_NAME}</h1>
+            <p className="text-xs opacity-80">{UI_TEXT.SYSTEM_SUBTITLE}</p>
           </div>
         </div>
       </div>
@@ -245,62 +244,62 @@ export default function DashboardPage() {
       <nav className="flex-1 p-4 space-y-2">
         <button
           onClick={() => {
-            setActiveTab("encrypt");
+            setActiveTab(TABS.ENCRYPT);
             setSidebarOpen(false);
           }}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-            activeTab === "encrypt"
+            activeTab === TABS.ENCRYPT
               ? "bg-sidebar-accent text-sidebar-accent-foreground"
               : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
           }`}
         >
           <Lock className="h-5 w-5" />
-          <span className="font-medium">Encriptar documento</span>
+          <span className="font-medium">{UI_TEXT.ENCRYPT_BUTTON}</span>
         </button>
 
         <button
           onClick={() => {
-            setActiveTab("decrypt");
+            setActiveTab(TABS.DECRYPT);
             setSidebarOpen(false);
           }}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-            activeTab === "decrypt"
+            activeTab === TABS.DECRYPT
               ? "bg-sidebar-accent text-sidebar-accent-foreground"
               : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
           }`}
         >
           <Unlock className="h-5 w-5" />
-          <span className="font-medium">Descargar documento</span>
+          <span className="font-medium">{UI_TEXT.DECRYPT_BUTTON}</span>
         </button>
 
         <button
           onClick={() => {
-            setActiveTab("history");
+            setActiveTab(TABS.HISTORY);
             setSidebarOpen(false);
           }}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-            activeTab === "history"
+            activeTab === TABS.HISTORY
               ? "bg-sidebar-accent text-sidebar-accent-foreground"
               : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
           }`}
         >
           <History className="h-5 w-5" />
-          <span className="font-medium">Historial</span>
+          <span className="font-medium">{UI_TEXT.HISTORY_BUTTON}</span>
         </button>
 
         <button
           onClick={() => {
-            setActiveTab("profile");
+            setActiveTab(TABS.PROFILE);
             setSidebarOpen(false);
           }}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-            activeTab === "profile"
+            activeTab === TABS.PROFILE
               ? "bg-sidebar-accent text-sidebar-accent-foreground"
               : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
           }`}
         >
           <User className="h-5 w-5" />
-          <span className="font-medium">Perfil</span>
+          <span className="font-medium">{UI_TEXT.PROFILE_BUTTON}</span>
         </button>
       </nav>
     </div>
@@ -339,18 +338,20 @@ export default function DashboardPage() {
                   imageSrc="/isotipo.svg"
                 />
                 <h1 className="text-lg font-bold hidden sm:block">
-                  BANRESERVAS
+                  {UI_TEXT.APP_NAME}
                 </h1>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-sm hidden sm:inline">Banreservas</span>
+              <span className="text-sm hidden sm:inline">
+                {UI_TEXT.APP_NAME}
+              </span>
               <Button
                 variant="ghost"
                 size="icon"
                 className="rounded-full text-primary-foreground hover:bg-primary/90"
-                onClick={() => setActiveTab("profile")}
+                onClick={() => setActiveTab(TABS.PROFILE)}
               >
                 <Avatar className="h-8 w-8 bg-white">
                   <AvatarFallback className="bg-white text-primary font-semibold">
@@ -363,14 +364,14 @@ export default function DashboardPage() {
         </header>
 
         <main className="flex-1 p-6 lg:p-8">
-          {activeTab === "encrypt" && (
+          {activeTab === TABS.ENCRYPT && (
             <EncryptPage
               handleFileUpload={handleFileUpload}
               fileInputRef={fileInputRef}
             />
           )}
 
-          {activeTab === "decrypt" && (
+          {activeTab === TABS.DECRYPT && (
             <DecryptPage
               loading
               downloadableFiles={downloadableFiles}
@@ -379,9 +380,11 @@ export default function DashboardPage() {
             />
           )}
 
-          {activeTab === "history" && <HistoryPage loading history={history} />}
+          {activeTab === TABS.HISTORY && (
+            <HistoryPage loading history={history} />
+          )}
 
-          {activeTab === "profile" && userProfile && (
+          {activeTab === TABS.PROFILE && userProfile && (
             <ProfilePage
               userProfile={userProfile}
               handleLogout={handleLogout}
@@ -402,16 +405,8 @@ export default function DashboardPage() {
 
       <PasswordModal
         open={showPasswordModal}
-        title={
-          passwordModalType === "upload"
-            ? "Contraseña de Encriptación"
-            : "Contraseña de Desencriptación"
-        }
-        description={
-          passwordModalType === "upload"
-            ? "Ingrese una contraseña para encriptar el archivo"
-            : "Ingrese la contraseña para desencriptar el archivo"
-        }
+        title={PASSWORD_MODAL_CONFIG[passwordModalType].title}
+        description={PASSWORD_MODAL_CONFIG[passwordModalType].description}
         onConfirm={handlePasswordConfirmed}
         onCancel={() => {
           setShowPasswordModal(false);
@@ -431,7 +426,7 @@ export default function DashboardPage() {
       <ProgressModal
         open={uploading}
         progress={uploadProgress}
-        message="Cargando..."
+        message={UI_TEXT.LOADING_MESSAGE}
       />
     </div>
   );
