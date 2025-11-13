@@ -31,6 +31,7 @@ import {
 import { FileUploadModal } from "@/components/file-upload-modal";
 import { PasswordModal } from "@/components/password-modal";
 import { EncryptPage } from "./encrypt/page";
+import { DecryptPage } from "./download/page";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -313,25 +314,6 @@ export default function DashboardPage() {
     </div>
   );
 
-  const DecryptPage = () => (
-    <div className="max-w-6xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Descargar Documento</h2>
-      {loading ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Cargando archivos...</p>
-        </div>
-      ) : (
-        <FilesDataTable
-          files={downloadableFiles}
-          showDownloadButton={true}
-          onDownload={handleFileDownload}
-          onDownloadOriginal={handleFileDownloadOriginal}
-          itemsPerPage={10}
-        />
-      )}
-    </div>
-  );
-
   const HistoryPage = () => (
     <div className="max-w-6xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">Historial de Archivos</h2>
@@ -482,7 +464,14 @@ export default function DashboardPage() {
             />
           )}
 
-          {activeTab === "decrypt" && <DecryptPage />}
+          {activeTab === "decrypt" && (
+            <DecryptPage
+              loading
+              downloadableFiles={downloadableFiles}
+              handleFileDownload={handleFileDownload}
+              handleFileDownloadOriginal={handleFileDownloadOriginal}
+            />
+          )}
 
           {activeTab === "history" && <HistoryPage />}
 
