@@ -30,6 +30,7 @@ import {
 } from "@/components/history-data-table";
 import { FileUploadModal } from "@/components/file-upload-modal";
 import { PasswordModal } from "@/components/password-modal";
+import { EncryptPage } from "./encrypt/page";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -312,38 +313,6 @@ export default function DashboardPage() {
     </div>
   );
 
-  const EncryptPage = () => (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-card rounded-lg border border-border p-12 text-center">
-        <div className="mb-6 inline-flex items-center justify-center w-24 h-24 rounded-full bg-muted">
-          <FileText className="h-12 w-12 text-muted-foreground" />
-          <Plus className="h-6 w-6 text-muted-foreground absolute translate-x-4 translate-y-4" />
-        </div>
-        <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-          Haga clic en "Agregar" para encriptar
-        </p>
-        <label htmlFor="file-upload">
-          <Button
-            asChild
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            <span className="cursor-pointer">
-              <Upload className="mr-2 h-4 w-4" />
-              Agregar Archivo
-            </span>
-          </Button>
-        </label>
-        <input
-          id="file-upload"
-          type="file"
-          className="hidden"
-          onChange={handleFileUpload}
-          ref={fileInputRef}
-        />
-      </div>
-    </div>
-  );
-
   const DecryptPage = () => (
     <div className="max-w-6xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">Descargar Documento</h2>
@@ -506,7 +475,12 @@ export default function DashboardPage() {
         </header>
 
         <main className="flex-1 p-6 lg:p-8">
-          {activeTab === "encrypt" && <EncryptPage />}
+          {activeTab === "encrypt" && (
+            <EncryptPage
+              handleFileUpload={handleFileUpload}
+              fileInputRef={fileInputRef}
+            />
+          )}
 
           {activeTab === "decrypt" && <DecryptPage />}
 
