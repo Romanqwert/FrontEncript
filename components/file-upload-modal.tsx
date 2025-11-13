@@ -48,14 +48,20 @@ export function FileUploadModal({
 
       // Extract keys if it's a JSON, XML, or CONFIG file
       const fileExt = file.name.split(".").pop()?.toLowerCase();
-      if (fileExt === "json") {
-        extractJsonKeys(content);
-      } else if (fileExt === "xml") {
-        extractXmlKeys(content);
-      } else if (fileExt === "config") {
-        extractConfigKeys(content);
-      } else {
-        setKeys([]);
+
+      switch (fileExt) {
+        case "json":
+          extractJsonKeys(content);
+          break;
+        case "xml":
+          extractXmlKeys(content);
+          break;
+        case "config":
+          extractConfigKeys(content);
+          break;
+        default:
+          setKeys([]);
+          break;
       }
     } catch (error) {
       console.error("Error reading file:", error);
