@@ -100,10 +100,10 @@ export function FilesDataTable({
               {showDownloadButton && (
                 <>
                   <TableHead className="text-right">
-                    Descargar Encriptado
+                    Descargar encriptado
                   </TableHead>
                   <TableHead className="text-right">
-                    Descargar Original
+                    Descargar y desencriptar
                   </TableHead>
                 </>
               )}
@@ -166,7 +166,7 @@ export function FilesDataTable({
                           ) : (
                             <>
                               <Download className="h-4 w-4 mr-2" />
-                              Original
+                              Desencriptar
                             </>
                           )}
                         </Button>
