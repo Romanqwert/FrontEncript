@@ -18,7 +18,7 @@ export function ProfilePage({ userProfile, handleLogout }: ProfilePageProps) {
         <CardHeader className="border-b border-border bg-muted/30">
           <div className="flex items-center gap-4">
             <Avatar className="h-20 w-20 bg-primary">
-              <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">
+              <AvatarFallback className="bg-primary text-primary-foreground text-4xl font-bold flex items-center justify-center h-full w-full">
                 {userProfile.nombreUsuario.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>

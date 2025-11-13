@@ -372,7 +372,7 @@ export default function DashboardPage() {
 
           {activeTab === TABS.DECRYPT && (
             <DecryptPage
-              loading
+              loading={loading}
               downloadableFiles={downloadableFiles}
               handleFileDownload={handleFileDownload}
               handleFileDownloadOriginal={handleFileDownloadOriginal}
@@ -380,7 +380,7 @@ export default function DashboardPage() {
           )}
 
           {activeTab === TABS.HISTORY && (
-            <HistoryPage loading history={history} />
+            <HistoryPage loading={loading} history={history} />
           )}
 
           {activeTab === TABS.PROFILE && userProfile && (
