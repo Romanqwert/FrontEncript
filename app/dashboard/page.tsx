@@ -19,7 +19,6 @@ import { EncryptPage } from "./encrypt/page";
 import { DecryptPage } from "./download/page";
 import { HistoryPage } from "./history/page";
 import { ProfilePage } from "./profile/page";
-
 import {
   TABS,
   type TabType,
