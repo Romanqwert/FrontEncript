@@ -204,6 +204,20 @@ class ApiClient {
     document.body.removeChild(a);
   }
 
+  async deleteFile(id: number) {
+    const response = await fetch(`${API_BASE_URL}/api/Archivos/delete/${id}`, {
+      method: "DELETE",
+      headers: this.getAuthHeader(),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error || "Error al eliminar archivo");
+    }
+
+    return response.json();
+  }
+
   logout() {
     localStorage.removeItem("token");
   }

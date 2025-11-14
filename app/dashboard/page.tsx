@@ -3,8 +3,8 @@
 import type React from "react";
 
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { Menu, Lock, Unlock, History, User } from "lucide-react";
+import { useRouter } from 'next/navigation';
+import { Menu, Lock, Unlock, History, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { api, type ArchivoInfo, type UserProfile } from "@/lib/api";
 import BanreservasLogo from "@/components/banreservas-logo";
@@ -225,6 +225,25 @@ export default function DashboardPage() {
     router.push("/login");
   };
 
+  const handleFileDelete = async (fileId: number) => {
+    if (!confirm("¿Estás seguro de que deseas eliminar este archivo?")) {
+      return;
+    }
+
+    try {
+      await api.deleteFile(fileId);
+      setModalType(MODAL_TYPES.SUCCESS);
+      setModalMessage("Archivo eliminado correctamente.");
+      setShowModal(true);
+      // Reload the downloadable files list
+      await loadDownloadableFiles();
+    } catch (error) {
+      setModalType(MODAL_TYPES.ERROR);
+      setModalMessage("Error al eliminar el archivo.");
+      setShowModal(true);
+    }
+  };
+
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
       <div className="p-6 border-b border-sidebar-border">
@@ -376,6 +395,7 @@ export default function DashboardPage() {
               downloadableFiles={downloadableFiles}
               handleFileDownload={handleFileDownload}
               handleFileDownloadOriginal={handleFileDownloadOriginal}
+              handleFileDelete={handleFileDelete}
             />
           )}
 

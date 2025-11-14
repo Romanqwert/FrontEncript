@@ -6,6 +6,7 @@ interface DecryptPageProps {
   downloadableFiles: ArchivoInfo[];
   handleFileDownload: (file: ArchivoInfo) => void;
   handleFileDownloadOriginal: (file: ArchivoInfo) => void;
+  handleFileDelete: (fileId: number) => void;
 }
 
 export function DecryptPage({
@@ -13,6 +14,7 @@ export function DecryptPage({
   downloadableFiles,
   handleFileDownload,
   handleFileDownloadOriginal,
+  handleFileDelete,
 }: DecryptPageProps) {
   return (
     <div className="max-w-6xl mx-auto">
@@ -27,6 +29,7 @@ export function DecryptPage({
           showDownloadButton={true}
           onDownload={handleFileDownload}
           onDownloadOriginal={handleFileDownloadOriginal}
+          onDelete={handleFileDelete}
           itemsPerPage={10}
         />
       )}

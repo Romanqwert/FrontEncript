@@ -1,13 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  FileText,
-  Download,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-} from "lucide-react";
+import { FileText, Download, ChevronLeft, ChevronRight, Loader2, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -24,6 +18,7 @@ interface FilesDataTableProps {
   showDownloadButton?: boolean;
   onDownload?: (file: ArchivoInfo) => void;
   onDownloadOriginal?: (file: ArchivoInfo) => void;
+  onDelete?: (fileId: number) => void;
   itemsPerPage?: number;
 }
 
@@ -32,6 +27,7 @@ export function FilesDataTable({
   showDownloadButton = false,
   onDownload,
   onDownloadOriginal,
+  onDelete,
   itemsPerPage = 10,
 }: FilesDataTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -105,6 +101,7 @@ export function FilesDataTable({
                   <TableHead className="text-right">
                     Descargar y desencriptar
                   </TableHead>
+                  <TableHead className="text-right">Eliminar</TableHead>
                 </>
               )}
             </TableRow>
@@ -169,6 +166,17 @@ export function FilesDataTable({
                               Desencriptar
                             </>
                           )}
+                        </Button>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          onClick={() => onDelete?.(file.idArchivo)}
+                          size="sm"
+                          variant="destructive"
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Eliminar
                         </Button>
                       </TableCell>
                     </>
