@@ -15,6 +15,8 @@ export const MODAL_MESSAGES = {
   LOAD_HISTORY_ERROR: "Error al cargar archivos",
   LOAD_FILES_ERROR: "Error al cargar archivos para descargar",
   LOAD_PROFILE_ERROR: "Error loading profile",
+  DELETE_SUCCESS: "Archivo eliminado correctamente.",
+  DELETE_ERROR: "Error al eliminar el archivo.",
 } as const;
 
 export const MODAL_TYPES = {

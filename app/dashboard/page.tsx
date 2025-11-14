@@ -232,16 +232,14 @@ export default function DashboardPage() {
 
     try {
       await api.deleteFile(fileId);
-      console.log("successss");
       setModalType(MODAL_TYPES.SUCCESS);
-      setModalMessage("Archivo eliminado correctamente.");
+      setModalMessage(MODAL_MESSAGES.DELETE_SUCCESS);
       setShowModal(true);
       // Reload the downloadable files list
       await loadDownloadableFiles();
     } catch (error) {
-      console.error(error);
       setModalType(MODAL_TYPES.ERROR);
-      setModalMessage("Error al eliminar el archivo.");
+      setModalMessage(MODAL_MESSAGES.DELETE_ERROR);
       setShowModal(true);
     }
   };
