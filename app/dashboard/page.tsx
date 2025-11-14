@@ -3,8 +3,8 @@
 import type React from "react";
 
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from 'next/navigation';
-import { Menu, Lock, Unlock, History, User } from 'lucide-react';
+import { useRouter } from "next/navigation";
+import { Menu, Lock, Unlock, History, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api, type ArchivoInfo, type UserProfile } from "@/lib/api";
 import BanreservasLogo from "@/components/banreservas-logo";
@@ -232,12 +232,14 @@ export default function DashboardPage() {
 
     try {
       await api.deleteFile(fileId);
+      console.log("successss");
       setModalType(MODAL_TYPES.SUCCESS);
       setModalMessage("Archivo eliminado correctamente.");
       setShowModal(true);
       // Reload the downloadable files list
       await loadDownloadableFiles();
     } catch (error) {
+      console.error(error);
       setModalType(MODAL_TYPES.ERROR);
       setModalMessage("Error al eliminar el archivo.");
       setShowModal(true);

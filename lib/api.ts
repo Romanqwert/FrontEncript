@@ -211,11 +211,12 @@ class ApiClient {
     });
 
     if (!response.ok) {
+      console.log("hoooolaaa");
       const error = await response.text();
       throw new Error(error || "Error al eliminar archivo");
     }
 
-    return response.json();
+    return "Archivo eliminado correctamente";
   }
 
   logout() {
