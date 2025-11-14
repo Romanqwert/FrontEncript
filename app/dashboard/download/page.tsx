@@ -9,7 +9,7 @@ interface DecryptPageProps {
   handleFileDelete: (fileId: number) => void;
 }
 
-export function DecryptPage({
+export default function DecryptPage({
   loading,
   downloadableFiles,
   handleFileDownload,

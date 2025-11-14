@@ -7,7 +7,7 @@ interface EncryptPageProps {
   fileInputRef: Ref<HTMLInputElement> | undefined;
 }
 
-export function EncryptPage({
+export default function EncryptPage({
   handleFileUpload,
   fileInputRef,
 }: EncryptPageProps) {

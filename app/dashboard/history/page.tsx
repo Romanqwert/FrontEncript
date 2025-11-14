@@ -8,7 +8,7 @@ interface HistoryPageProps {
   history: HistorialInfo[];
 }
 
-export function HistoryPage({ loading, history }: HistoryPageProps) {
+export default function HistoryPage({ loading, history }: HistoryPageProps) {
   return (
     <div className="max-w-6xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">Historial de Archivos</h2>

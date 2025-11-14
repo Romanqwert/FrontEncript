@@ -15,10 +15,10 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { type HistorialInfo } from "@/components/history-data-table";
 import { FileUploadModal } from "@/components/file-upload-modal";
 import { PasswordModal } from "@/components/password-modal";
-import { EncryptPage } from "./encrypt/page";
-import { DecryptPage } from "./download/page";
-import { HistoryPage } from "./history/page";
-import { ProfilePage } from "./profile/page";
+import EncryptPage from "./encrypt/page";
+import DecryptPage from "./download/page";
+import HistoryPage from "./history/page";
+import ProfilePage from "./profile/page";
 import {
   TABS,
   type TabType,
